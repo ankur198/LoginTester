@@ -1,36 +1,52 @@
 # %%
 import datetime
 import os
+import sys
 import time
-from ldap3 import Server, Connection, ALL, NTLM
-
 import dotenv
+from ldapLogin import tryLdap
+from jiraLogin import tryJira
 
 dotenv.load_dotenv()
 
-filePath = f'run/{datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")}.txt'
+filePath = f'run/log.txt'
 os.makedirs('run', exist_ok=True)
+
+try:
+    host = os.environ['host']
+    port = os.environ['port']
+    username = os.environ['username']
+    password = os.environ['password']
+    mode = os.environ['mode']
+except Exception as e:
+    print("Error: Configuration not set properly")
+    print(e)
+    sys.exit(-1)
+
+config = {
+    "host": host,
+    "port": port,
+    "username": username,
+    "password": password,
+    "mode": mode
+}
 # %%
-server = Server(os.environ['host'], port=int(os.environ['port']), get_info=ALL)
+print("Using config:", config)
 
 # %%
 while True:
-    username = 'unknown'
-    try:
-        conn = Connection(
-            server,
-            user=os.environ['user'],
-            password=os.environ['password'],
-            auto_bind=True)
-        username = conn.extend.standard.who_am_i()
-        conn.unbind()
-    except:
-        username = 'unknown'
-
+    result = False
+    if mode == 'ldap':
+        result = tryLdap(host, port, username, password)
+    elif mode == 'jira':
+        result = tryJira(host, port, username, password)
+        
+    result = 'failed' if result is False else 'success'
+    
     with open(filePath, 'a') as f:
-        dataToWrite = f'{datetime.datetime.now().isoformat()}\t{username}'
+        dataToWrite = f'{datetime.datetime.now().isoformat()}\t{result}'
         print(dataToWrite)
-        f.write(f'\n{dataToWrite}')
+        f.write(f'{dataToWrite}\n')
 
     time.sleep(10)
 # %%
