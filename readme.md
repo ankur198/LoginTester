@@ -1,5 +1,5 @@
 # Login Tester
-Scripts to check if you are able to login or not
+Scripts to check if you are able to login or not. Runs at every 10 seconds and logs the result
 
 ## How to run
 
@@ -10,7 +10,6 @@ Replace variables `<VARIABLE>` before running command
     sudo docker run -d \
         --name logintester \
         -p 8501:8501 \
-        -v $(pwd):/app \
         -e TZ='Asia/Kolkata' \
         -e host=<HOST> \
         -e port=<PORT> \
@@ -24,7 +23,6 @@ Replace variables `<VARIABLE>` before running command
     sudo docker run -d `
         --name logintester `
         -p 8501:8501 `
-        -v $(pwd):/app `
         -e TZ='Asia/Kolkata' `
         -e host=<HOST> `
         -e port=<PORT> `
